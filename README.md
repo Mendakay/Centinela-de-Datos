@@ -147,7 +147,7 @@ Centinela_de_Datos/
 └── README.md             Este documento
 ```
 
-### Qué hace cada cosa (sin tecnicismos)
+### Qué hace cada cosa
 
 **Las carpetas de datos**
 
@@ -159,7 +159,7 @@ Centinela_de_Datos/
 
 **El programa (`src/`)**
 
-| Archivo | Qué hace, en palabras simples |
+| Archivo | Qué hace|
 |---|---|
 | `pipeline.py` | **El jefe de la operación.** Revisa la bandeja, limpia cada Excel, lo revisa, lo guarda y lo manda a la carpeta que corresponde. Este es el archivo que se ejecuta |
 | `schema.py` | **El plano de la base de datos.** Define cómo son las tablas y sus reglas (por ejemplo, que un monto no pueda ser negativo). Es la última línea de defensa |
