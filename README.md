@@ -52,6 +52,7 @@ ventas_2024.xlsx pasó los controles de calidad.
 1200 filas cargadas (upsert) en raw.ventas
 Pipeline finalizado.
 Notificación enviada a Discord.
+```
 
 ![Ejecución en consola](docs/img/02_ejecucion_consola.png)
 
