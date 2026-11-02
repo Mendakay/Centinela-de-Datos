@@ -1,0 +1,27 @@
+# Entorno virtual
+.venv/
+
+# Secretos (NUNCA subir)
+.env
+.env.*
+!.env.example
+
+# Documentos personales / datos: ningún Excel ni Word se sube
+*.xlsx
+*.docx
+.pytest_cache/
+
+# Datos (pesados y sucios). Las carpetas se conservan con .gitkeep
+data/inbox/*.xlsx
+data/archive/
+data/rejected/
+
+# Logs
+logs/*.log*
+
+# Python
+__pycache__/
+*.pyc
+
+# Archivos temporales de Office
+~$*

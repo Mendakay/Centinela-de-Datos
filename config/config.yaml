@@ -1,0 +1,52 @@
+# =====================================================================
+#  config/config.yaml  -  LOS AJUSTES DEL CENTINELA
+# =====================================================================
+#  Aqui cambias lo que NO requiere programar. Guarda el archivo y listo:
+#  la proxima vez que corra el Centinela usara los valores nuevos.
+#
+#  Cada seccion de abajo dice QUE CAMBIA:
+#    paths    -> en que carpetas deja/mueve los Excels
+#    database -> a que base de datos se conecta (sin contrasenas)
+#    quality  -> cuantos errores tolera antes de rechazar un archivo
+#    alerts   -> si manda aviso a Discord y que texto muestra
+#    generation -> solo para los datos de practica (generate_data.py)
+#
+#  NO pongas contrasenas aqui: van en el archivo .env
+#  La hora de la ejecucion diaria NO esta aqui: ver tarea_programada/tarea_diaria.ps1
+# =====================================================================
+project:
+  name: "Centinela de Datos"
+  version: "0.1.0"
+
+paths:
+  inbox: "data/inbox"        # Aquí se dejan los Excels NUEVOS (el pipeline solo mira esta carpeta)
+  archive: "data/archive"    # Excels ya cargados con éxito (se mueven aquí)
+  rejected: "data/rejected"  # Excels rechazados por calidad o con nombre no reconocido
+
+# Conexión a PostgreSQL. SIN secretos: DB_USER y DB_PASSWORD viven en .env
+database:
+  host: "localhost"
+  port: 5432
+  name: "centinela_db"
+  schema_raw: "raw"
+  schema_analytics: "analytics"
+
+# Umbrales del Quality Gate
+quality:
+  # Los valores son proporciones: 0.05 = 5%, 0.10 = 10%, 0 = no tolera ni un error.
+  # Si el archivo supera el limite se rechaza completo; si no, solo se apartan las filas malas.
+  max_invalid_amount_pct: 0.05  # Máx. % de montos negativos/nulos antes de rechazar el archivo
+  max_invalid_key_pct: 0.05     # Máx. % de ids nulos/repetidos antes de rechazar el archivo
+
+# Alertas por Discord. La URL del webhook es un secreto: va en .env como DISCORD_WEBHOOK_URL
+alerts:
+  notify_on_success: true            # true = tarjeta verde también cuando todo sale bien
+  environment: "Local / Desarrollo"  # Texto del campo "Entorno" en la tarjeta
+
+generation:
+  num_rows: 1200
+  seed: 42  # Semilla para que los datos sean siempre los mismos
+  files:
+    ventas: "ventas_2024.xlsx"
+    clientes: "clientes_sucio.xlsx"
+    productos: "productos_v2.xlsx"
