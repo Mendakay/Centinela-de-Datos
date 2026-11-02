@@ -1,64 +1,57 @@
-﻿# 🛡️ El Centinela de Datos
+﻿# El Centinela de Datos
 
 ## ¿De qué trata este proyecto?
 
-Imagina que tu empresa recibe todos los días listas de ventas, clientes y productos en archivos de Excel. Esos archivos casi nunca vienen limpios:
+Las empresas reciben a diario listas de ventas, clientes y productos en archivos de Excel. Estos archivos suelen presentar problemas: las fechas están escritas de formas distintas (15/03/2024, 2024-03-15), los nombres tienen espacios extra, cada archivo usa nombres diferentes para la misma columna ("cliente", "Nombre Completo") y a veces aparecen montos negativos o filas duplicadas. Guardar la información en ese estado genera reportes incorrectos y falta de confianza en los números.
 
-- las fechas están escritas de formas distintas (`15/03/2024`, `2024-03-15`...),
-- los nombres traen espacios de más,
-- cada archivo llama diferente a lo mismo ("cliente", "Nombre Completo"...),
-- a veces hay montos negativos o filas repetidas por error.
-
-Si guardas todo eso así, los reportes salen mal y nadie confía en los números.
-
-**El Centinela de Datos** es un vigilante automático: lee esos Excels, los limpia, revisa que estén bien, **rechaza o aparta lo que está mal**, y guarda lo bueno en una base de datos ordenada.
+El Centinela de Datos es un sistema automático que lee estos archivos, los limpia, verifica que estén correctos, aparta la información errónea y guarda los datos válidos en una base de datos estructurada.
 
 ## ¿Para qué se hizo?
 
-Es un proyecto de portafolio para practicar y demostrar cómo trabaja un **Ingeniero de Datos**: tomar datos desordenados y entregarlos limpios y confiables para que otras personas puedan analizarlos.
+Es un proyecto de portafolio diseñado para practicar y demostrar cómo trabaja un Ingeniero de Datos: recibir datos desordenados, procesarlos y entregarlos limpios y confiables para que otras personas puedan analizarlos.
 
 ## ¿Qué hace, paso a paso?
 
-1. **Tiene una bandeja de entrada.** Dejas los Excels nuevos en la carpeta `data/inbox/` y el Centinela solo trabaja con lo que haya ahí. Para practicar, puede generar 3 Excels "sucios" a propósito (ventas, clientes, productos).
-2. **Los lee y los limpia.** Pone los mismos nombres de columnas en todos, quita espacios sobrantes y arregla las fechas.
+1. **Tiene una bandeja de entrada.**  Los Excels nuevos se depositan en la carpeta data/inbox/. El sistema procesa únicamente los archivos que estén en esa ubicación. Para realizar pruebas, el sistema puede generar tres Excels con errores a propósito (ventas, clientes, productos).
+2. **Los lee y los limpia.** Estandariza los nombres de las columnas en todos los archivos, elimina los espacios sobrantes y corrige los formatos de fecha.
 3. **Los revisa (el "guardián").**
-   - Si un archivo tiene demasiadas fechas rotas, lo rechaza completo.
-   - Si hay montos negativos, aparta esas filas y deja pasar el resto.
-   - Si hay códigos repetidos, se queda con el primero y aparta los demás.
-   - Si hay demasiados problemas de este tipo, rechaza el archivo completo.
-   - Si faltan columnas obligatorias, rechaza el archivo con un mensaje claro.
-4. **Guarda lo bueno** en una base de datos (PostgreSQL), en tablas con reglas que impiden meter datos absurdos. Los datos nuevos se **suman** a los anteriores; si llega una fila que ya existía, se actualiza en vez de duplicarse.
-5. **Ordena los archivos.** Los que se cargaron bien pasan a la carpeta `archive/`; los que se rechazaron, a `rejected/` para que alguien los revise. Así nunca se procesa dos veces el mismo archivo.
-6. **Lo apunta todo en un diario** (`logs/centinela.log`): qué se procesó, qué se rechazó y por qué.
-7. **Prepara resúmenes listos para usar.** Por ejemplo, "cuánto se vendió cada mes" y "cuánto compró cada cliente", para que nadie tenga que hacer las cuentas a mano.
-8. **Te avisa del resultado.** Al terminar manda una tarjeta a un canal de Discord (si lo configuras; es opcional): **verde** si todo salió bien, **roja** si algo falló.
-9. **Puede ejecutarse solo (opcional).** Si lo activas, Windows lo lanza todos los días a la hora que elijas (por defecto, 7:00). **Viene apagado**: tú decides si lo quieres y puedes desactivarlo cuando quieras (ver [Ejecución diaria automática](#ejecución-diaria-automática-opcional)).
+  - Rechaza el archivo completo si contiene demasiadas fechas con errores.
+   - Aparta las filas con montos negativos y deja pasar el resto.
+   - Conserva el primer registro y aparta los códigos duplicados.
+   - Rechaza el archivo completo si la cantidad de problemas supera el límite permitido.
+   - Rechaza el archivo y muestra un mensaje claro si faltan columnas obligatorias.
+4. **Almacenamiento:** Guarda los datos válidos en una base de datos PostgreSQL, en tablas con reglas que impiden el ingreso de datos incorrectos. Los datos nuevos se suman a los anteriores; si llega una fila que ya existía, se actualiza su información.
+5. **Organización de archivos:** Los archivos procesados con éxito se mueven a la carpeta `archive/`, y los rechazados a la carpeta `rejected/` para su revisión manual. Esto evita procesar el mismo archivo dos veces.
+6. **Registro de actividad:** Guarda un historial en el archivo `logs/centinela.log`, detallando qué se procesó, qué se rechazó y el motivo.
+7. **Resúmenes automáticos:** Prepara informes listos para usar, como las ventas mensuales y las compras por cliente, para evitar cálculos manuales.
+8. **Notificaciones:** Al finalizar, envía un aviso a un canal de Discord (si está configurado). El aviso es verde si todo salió bien y rojo si hubo algún fallo.
+9. **Ejecución automática (opcional):** El sistema puede configurarse para ejecutarse diariamente en Windows a una hora específica (por defecto, a las 7:00). Esta función está desactivada por defecto y el usuario decide cuándo activarla. (ver [Ejecución diaria automática](#ejecución-diaria-automática-opcional)).
 
 ## Cómo se ve en acción
 
 > Todas las capturas usan datos de práctica generados con `src/generate_data.py`, no datos reales.
 
-### 1. El problema: un Excel sucio
-Fechas escritas de formas distintas, espacios de más y montos negativos. Así llegan los archivos.
+### 1. El problema: un Excel con errores
+
+Los archivos llegan con fechas en formatos distintos, espacios extra y montos negativos.
 
 ![Excel sucio](docs/img/01_excel_sucio.png)
 
 ### 2. El Centinela trabajando
-Al ejecutar `ejecutar_centinela.bat` revisa la bandeja, limpia cada archivo, lo valida y lo carga. Ejemplo real de lo que queda en el diario (`logs/centinela.log`):
+Al ejecutar `ejecutar_centinela.bat`, el sistema revisa la bandeja, limpia cada archivo, lo valida y lo carga. Este es un ejemplo de lo que se registra en el diario (`logs/centinela.log`):
 
-```
+```text
 Procesando: clientes_sucio.xlsx...
-✅ clientes_sucio.xlsx pasó los controles de calidad.
-💾 1200 filas cargadas (upsert) en raw.clientes
+clientes_sucio.xlsx pasó los controles de calidad.
+1200 filas cargadas (upsert) en raw.clientes
 Procesando: productos_v2.xlsx...
-✅ productos_v2.xlsx pasó los controles de calidad.
-💾 1200 filas cargadas (upsert) en raw.productos
+productos_v2.xlsx pasó los controles de calidad.
+1200 filas cargadas (upsert) en raw.productos
 Procesando: ventas_2024.xlsx...
-✅ ventas_2024.xlsx pasó los controles de calidad.
-💾 1200 filas cargadas (upsert) en raw.ventas
-🏁 Pipeline finalizado.
-📣 Notificación enviada a Discord.
-```
+ventas_2024.xlsx pasó los controles de calidad.
+1200 filas cargadas (upsert) en raw.ventas
+Pipeline finalizado.
+Notificación enviada a Discord.
 
 ![Ejecución en consola](docs/img/02_ejecucion_consola.png)
 
@@ -108,10 +101,10 @@ Nadie del área tiene que abrir código ni una terminal. Su trabajo se reduce a 
 **Qué no hace:** no corrige datos de negocio por su cuenta (si un monto es negativo, lo aparta, no lo adivina), y no recibe los archivos solo: alguien o algún proceso debe depositarlos en la bandeja.
 
 ### Para un equipo técnico
-- **Idempotente:** cargar dos veces el mismo archivo no duplica filas (upsert por clave primaria, en una transacción con rollback).
-- **Quality gate configurable:** umbrales en `config/config.yaml` (`quality.*`). Rechazo total del archivo o cuarentena solo de las filas malas, según el porcentaje.
-- **Restricciones en la base de datos** (`CHECK`, `NOT NULL`, claves primarias): una segunda línea de defensa si el código falla.
-- **Observabilidad:** log con rotación en `logs/centinela.log` y una tarjeta de Discord por corrida. Los números salen de la corrida real.
+- **Procesamiento seguro:** Los reportes se generan siguiendo las mismas reglas todos los días, eliminando la dependencia de la limpieza manual del Excel.
+- **Reglas de calidad configurables:** Los límites se ajustan en config/config.yaml (quality.*). El sistema puede rechazar el archivo completo o apartar únicamente las filas con errores, según el porcentaje.
+- **Restricciones en la base de datos** (`CHECK`, `NOT NULL`, claves primarias): Actúan como segunda línea de defensa si el código falla.
+- **Observabilidad:** Registro con rotación en logs/centinela.log y una tarjeta de Discord por ejecución. Las métricas provienen de la ejecución real.
 - **Secretos fuera del código:** usuario, contraseña y webhook van en `.env`, que no se sube a git.
 - **Pruebas:** `pytest tests -v` cubre el guardián, la bandeja, las alertas y los casos borde de limpieza.
 - **Extensión:** para un tipo nuevo de archivo se agrega una entrada en `TABLE_RULES` (`src/pipeline.py`) y su tabla en `src/schema.py`.
@@ -259,16 +252,23 @@ Ten en cuenta: solo corre si el computador está encendido y con tu sesión de W
 El inicio de `src/pipeline.py` repite esta guía para quien abra el código.
 
 ## ¿En qué punto está?
+Genera datos de práctica con errores.
 
-- ✅ Genera datos sucios de práctica
-- ✅ Los limpia y estandariza
-- ✅ Los revisa y aparta lo malo
-- ✅ Los guarda en PostgreSQL con reglas de seguridad
-- ✅ Crea resúmenes listos para reportes (ventas por mes y por cliente)
-- ✅ Avisa por Discord con una tarjeta verde (todo bien) o roja (algo falló)
-- ✅ Puede ejecutarse solo cada día a la hora que elijas, y se activa/desactiva con doble clic (mientras el computador esté encendido con la sesión iniciada)
-- ✅ Tiene una bandeja de entrada: procesa solo lo nuevo y ordena los archivos ya vistos
-- ⏳ Pendiente: que los Excels nuevos lleguen solos a la bandeja (hoy alguien tiene que dejarlos ahí)
+Limpia y estandariza los datos.
+
+Revisa y aparta la información incorrecta.
+
+Guarda los datos en PostgreSQL con reglas de seguridad.
+
+Crea resúmenes listos para reportes (ventas por mes y por cliente).
+
+Avisa por Discord con una tarjeta verde (todo bien) o roja (algo falló).
+
+Permite la ejecución diaria automática a la hora elegida, activable y desactivable con doble clic (con el equipo encendido y sesión iniciada).
+
+Cuenta con una bandeja de entrada: procesa solo lo nuevo y ordena los archivos ya vistos.
+
+Pendiente: que los Excels nuevos lleguen solos a la bandeja (actualmente requiere que un usuario los deposite manualmente).
 
 ## Tecnologías
 
